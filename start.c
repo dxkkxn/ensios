@@ -103,8 +103,20 @@ int next_mult8(int x) {
   }
   return 8 * i;
 }
+void defilement(void) {
+  unsigned int *new_line = (unsigned int *)(0xB8000 + 80 * 2);
+  memmove((unsigned int *)0xB8000, new_line, 80 * 24 * 2);
+  for (int j = 0; j < 80; j++) { // delete the chars of the last line
+    ecrit_car(24, j, ' ');
+  }
+  /* place_curseur(LIG, COL); */
+}
 
 void traite_car(char c) {
+  if (LIG >= 25) {
+    defilement();
+    place_curseur(24, 0);
+  }
   switch (c) {
   case '\b':
     if (COL != 0)
@@ -129,11 +141,6 @@ void traite_car(char c) {
   }
 }
 
-void defilement(void) {
-  unsigned int *new_line = (unsigned int *)(0xB8000 + 80 * 2);
-  memmove((unsigned int *)0xB8000, new_line, 80 * 24 * 2);
-  place_curseur(LIG - 1, COL);
-}
 void defilement_respect_hour(void) {
   unsigned int *new_start = (unsigned int *)(0xB8000 + 80 * 2);
   unsigned int *new_line = (unsigned int *)(0xB8000 + 80 * 2 * 2);
@@ -154,7 +161,7 @@ uint8_t sec = 0;
 void write_hour(void) {
   place_curseur(0, 80 - 8);
   char buffer[9];
-  sprintf(buffer, "%02d:%02d:%02d", hour, min, sec);
+  /* sprintf(buffer, "%02d:%02d:%02d", hour, min, sec); */
   console_putbytes(buffer, 8);
   place_curseur(1, 0);
 }
@@ -251,7 +258,7 @@ void ordonnance() {
   // ctx_sw(process[old_process].ctx, process[curr_process].ctx);
   //
   node_t *old_node = curr_node;
-  node_t *curr_node = pop_head(&process_list);
+  curr_node = pop_head(&process_list);
   push_queue(&process_list, old_node);
   old_node->process->state = ACTIVABLE;
   curr_node->process->state = SELECTED;
