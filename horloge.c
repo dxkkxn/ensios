@@ -3,18 +3,16 @@
 #include <cpu.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "ecran.h"
 #include "segment.h"
+#include "gestion_processus.h"
 
 #define QUARTZ 0x1234DD
 #define CLOCKFREQ 50
 
-void traitant_IT_32(void);
 
-uint8_t hour = 0;
-uint8_t min = 0;
-uint8_t sec = 0;
 
 void gestion_horloge(void) {
   outb(0x43, 0x43);
@@ -33,10 +31,13 @@ void masque_IRQ(uint32_t num_IRQ, bool masque) {
   outb(res, 0x21);
 }
 
+uint8_t hour = 0;
+uint8_t min = 0;
+uint8_t sec = 0;
 void write_hour(void) {
   place_curseur(0, 80 - 8);
-  char buffer[9];
-  /* sprintf(buffer, "%02d:%02d:%02d", hour, min, sec); */
+  char buffer[13];
+  sprintf(buffer, "%02u:%02u:%02u", hour, min, sec);
   console_putbytes(buffer, 8);
   place_curseur(1, 0);
 }
@@ -77,5 +78,6 @@ void tic_PIT(void) {
     increment_hour();
     write_hour();
   }
+  ordonnance();
   return;
 }

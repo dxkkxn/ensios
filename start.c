@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <debug.h>
+
+#include "horloge.h"
 #include "ecran.h"
 #include "gestion_processus.h"
 
@@ -51,7 +53,11 @@ void process_func(void) {
   process_t *process = curr_node->process;
   for (;;) {
     printf("[%s] pid = %i\n", process->name, process->pid);
-    ordonnance();
+    sti();
+    hlt();
+    cli();
+
+    //ordonnance();
   }
 }
 // void proc1_func(void) {
@@ -66,7 +72,14 @@ void process_func(void) {
 //   }
 // }
 
+void traitant_IT_32(void);
 void kernel_start(void) {
+  efface_ecran();
+  init_traitant_IT(32, traitant_IT_32);
+  masque_IRQ(0, 0);
+  gestion_horloge();
+  write_hour();
+  sti();
   // process_t idle = {0, "idle", SELECTED};
   // process_t proc1 = {1, "proc1", ACTIVABLE};
   // process[0] = idle;
@@ -86,7 +99,6 @@ void kernel_start(void) {
   create_process(&process_func, "proc8");
   curr_node = pop_head(&process_list);
   curr_node->process->state = ACTIVABLE;
-  efface_ecran();
   process_func();
   //  idle_func();
 
@@ -108,28 +120,8 @@ void kernel_start(void) {
   //(void)x;
   //  ecrit_car(0, 0, 'a');
   //  ecrit_car(0, 1, 'b');
-  //  init_traitant_IT(32, traitant_IT_32);
-  //  gestion_horloge();
-  //  masque_IRQ(0, 0);
-  //  efface_ecran();
-  //  write_hour();
-  //  write_hour();
-  //  sti();
-  //  traite_car('1');
-  //  traite_car('2');
-  //  traite_car('3');
-  //  traite_car('4');
-  //  traite_car('\n');
-  //  traite_car('5');
-  //  traite_car('6');
-  //  traite_car('7');
-  //  defilement();
-  //  printf("xxxx");
-  //  defilement_respect_hour();
-  //   place_curseur(0, 0);
-  //      on ne doit jamais sortir de kernel_start
-  //  while (1) {
-  //   // cette fonction arrete le processeur
-  //   hlt();
-  // }
+   while (1) {
+    // cette fonction arrete le processeur
+    hlt();
+  }
 }

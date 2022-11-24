@@ -66,7 +66,7 @@ void defilement_respect_hour(void) {
 
 void traite_car(char c) {
   if (LIG >= 25) {
-    defilement();
+    defilement_respect_hour();
     place_curseur(24, 0);
   }
   switch (c) {
