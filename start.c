@@ -57,56 +57,25 @@ void idle() {
     cli();
   }
 }
-void proc1(void) {
-  for (int i=0; i< 3;i++) {
-    printf("[temps = %u] processus %s pid = %i\n", system_time,
-           curr_node->process->name,
-           curr_node->process->pid);
-    dors(2);
-  }
-  printf("PROCESSUS %s MORT\n", curr_node->process->name);
-}
-void proc2(void) {
-  for (int i = 0; i <5 ; i++) {
-    printf("[temps = %u] processus %s pid = %i\n", system_time,
-           curr_node->process->name,
-           curr_node->process->pid);
-    dors(3);
-  }
-  printf("PROCESSUS %s MORT\n", curr_node->process->name);
-}
-void proc3(void) {
-  for (int i = 0; i <10 ; i++) {
-    printf("[temps = %u] processus %s pid = %i\n", system_time,
-           curr_node->process->name,
-           curr_node->process->pid);
-    dors(5);
-  }
-  printf("PROCESSUS %s MORT\n", curr_node->process->name);
-}
 
 void process_func(void) {
   process_t *process = curr_node->process;
-  for (;;) {
+  for (int i = 0;i<3;i++) {
     cli();
     printf("[%s] pid = %i\n", process->name, process->pid);
+    dors(4);
     sti();
     hlt();
-
-    //ordonnance();
   }
+  printf("[%s] pid = %i killed\n", process->name, process->pid);
 }
-// void proc1_func(void) {
-//   // while (1) {
-//   //   printf("[proc1] idle m'a donne la main\n");
-//   //   printf("[proc1] je tente de lui la redonner\n");
-//   //   ctx_sw(process[1].ctx, process[0].ctx);
-//   // }
-//   for (;;) {
-//     printf("[%s] pid = %i\n", mon_nom(), mon_pid());
-//     ordonnance();
-//   }
-// }
+
+void pid1(void) {
+  printf("[pid1] creation de %d processus\n", 4);
+  for (int i = 0; i < 4; i++)
+    create_process(process_func, "son");
+
+}
 
 void traitant_IT_32(void);
 void kernel_start(void) {
@@ -125,14 +94,7 @@ void kernel_start(void) {
   // process[1].stack[511] = (uint32_t)proc1_func;
   // process[1].ctx[1] = (uint32_t)&process[1].stack[511];
   create_process(&idle, "idle");
-  create_process(&proc1, "proc1");
-  create_process(&proc2, "proc2");
-  create_process(&proc3, "proc3");
-  /* create_process(&process_func, "proc4"); */
-  /* create_process(&process_func, "proc5"); */
-  /* create_process(&process_func, "proc6"); */
-  /* create_process(&process_func, "proc7"); */
-  /* create_process(&process_func, "proc8"); */
+  create_process(&pid1, "pid1");
   curr_node = pop_head(&process_list);
   curr_node->process->state = SELECTED;
   idle();
