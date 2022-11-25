@@ -39,8 +39,9 @@ int32_t create_process(void (*func)(void), char *name) {
   strcpy(new->name, name);
   new->state = ACTIVABLE;
   process_count++;
-  new->stack[511] = (uint32_t)*func;
-  new->ctx[1] = (uint32_t) & new->stack[511];
+  new->stack[511] = (uint32_t)fin_processus;
+  new->stack[510] = (uint32_t)func;
+  new->ctx[1] = (uint32_t) & new->stack[510];
 
   node_t *new_node = malloc(sizeof(node_t));
   new_node->process = new;
@@ -64,7 +65,6 @@ void proc1(void) {
     dors(2);
   }
   printf("PROCESSUS %s MORT\n", curr_node->process->name);
-  fin_processus();
 }
 void proc2(void) {
   for (int i = 0; i <5 ; i++) {
@@ -74,7 +74,6 @@ void proc2(void) {
     dors(3);
   }
   printf("PROCESSUS %s MORT\n", curr_node->process->name);
-  fin_processus();
 }
 void proc3(void) {
   for (int i = 0; i <10 ; i++) {
@@ -84,7 +83,6 @@ void proc3(void) {
     dors(5);
   }
   printf("PROCESSUS %s MORT\n", curr_node->process->name);
-  fin_processus();
 }
 
 void process_func(void) {
