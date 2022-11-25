@@ -5,7 +5,7 @@
 #include <string.h> // for memmove
 
 
-uint32_t LIG, COL;
+uint32_t LIG = 1, COL = 0;
 uint16_t *ptr_mem(uint32_t lig, uint32_t col) {
   return (uint16_t *)(0xB8000 + 80 * 2 * lig + col * 2);
 }

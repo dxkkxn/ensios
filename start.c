@@ -1,7 +1,6 @@
 #include "segment.h"
 #include <cpu.h>
 #include <inttypes.h>
-#include <stdio.h>
 #include <string.h>
 #include <debug.h>
 
@@ -31,6 +30,7 @@
 
 extern linked_list_t process_list;
 extern node_t * curr_node;
+extern int system_time;
 
 int process_count = 0;
 int32_t create_process(void (*func)(void), char *name) {
@@ -49,13 +49,51 @@ int32_t create_process(void (*func)(void), char *name) {
   return process_count - 1;
 }
 
-void process_func(void) {
-  process_t *process = curr_node->process;
+void idle() {
   for (;;) {
-    printf("[%s] pid = %i\n", process->name, process->pid);
     sti();
     hlt();
     cli();
+  }
+}
+void proc1(void) {
+  for (int i=0; i< 3;i++) {
+    printf("[temps = %u] processus %s pid = %i\n", system_time,
+           curr_node->process->name,
+           curr_node->process->pid);
+    dors(2);
+  }
+  printf("PROCESSUS %s MORT\n", curr_node->process->name);
+  fin_processus();
+}
+void proc2(void) {
+  for (int i = 0; i <5 ; i++) {
+    printf("[temps = %u] processus %s pid = %i\n", system_time,
+           curr_node->process->name,
+           curr_node->process->pid);
+    dors(3);
+  }
+  printf("PROCESSUS %s MORT\n", curr_node->process->name);
+  fin_processus();
+}
+void proc3(void) {
+  for (int i = 0; i <10 ; i++) {
+    printf("[temps = %u] processus %s pid = %i\n", system_time,
+           curr_node->process->name,
+           curr_node->process->pid);
+    dors(5);
+  }
+  printf("PROCESSUS %s MORT\n", curr_node->process->name);
+  fin_processus();
+}
+
+void process_func(void) {
+  process_t *process = curr_node->process;
+  for (;;) {
+    cli();
+    printf("[%s] pid = %i\n", process->name, process->pid);
+    sti();
+    hlt();
 
     //ordonnance();
   }
@@ -79,7 +117,7 @@ void kernel_start(void) {
   masque_IRQ(0, 0);
   gestion_horloge();
   write_hour();
-  sti();
+  //sti();
   // process_t idle = {0, "idle", SELECTED};
   // process_t proc1 = {1, "proc1", ACTIVABLE};
   // process[0] = idle;
@@ -88,18 +126,18 @@ void kernel_start(void) {
   //(void)(proc1);
   // process[1].stack[511] = (uint32_t)proc1_func;
   // process[1].ctx[1] = (uint32_t)&process[1].stack[511];
-  create_process(&process_func, "idle");
-  create_process(&process_func, "proc1");
-  create_process(&process_func, "proc2");
-  create_process(&process_func, "proc3");
-  create_process(&process_func, "proc4");
-  create_process(&process_func, "proc5");
-  create_process(&process_func, "proc6");
-  create_process(&process_func, "proc7");
-  create_process(&process_func, "proc8");
+  create_process(&idle, "idle");
+  create_process(&proc1, "proc1");
+  create_process(&proc2, "proc2");
+  create_process(&proc3, "proc3");
+  /* create_process(&process_func, "proc4"); */
+  /* create_process(&process_func, "proc5"); */
+  /* create_process(&process_func, "proc6"); */
+  /* create_process(&process_func, "proc7"); */
+  /* create_process(&process_func, "proc8"); */
   curr_node = pop_head(&process_list);
-  curr_node->process->state = ACTIVABLE;
-  process_func();
+  curr_node->process->state = SELECTED;
+  idle();
   //  idle_func();
 
   // process[0].pid = 0;

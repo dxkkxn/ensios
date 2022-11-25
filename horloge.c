@@ -31,16 +31,19 @@ void masque_IRQ(uint32_t num_IRQ, bool masque) {
   outb(res, 0x21);
 }
 
-int sec = 3600;
+int system_time= 3600;
+extern uint32_t LIG, COL;
 void write_hour(void) {
+  uint32_t old_lig = LIG;
+  uint32_t old_col = COL;
   place_curseur(0, 80 - 8);
-  uint8_t hour = sec/3600;
-  uint8_t min = (sec%3600)/60;
-  uint8_t sec_to_display = (sec%3600)%60;
+  uint8_t hour = system_time/3600;
+  uint8_t min = (system_time%3600)/60;
+  uint8_t sec_to_display = (system_time%3600)%60;
   char buffer[13];
   sprintf(buffer, "%02u:%02u:%02u", hour, min, sec_to_display);
   console_putbytes(buffer, 8);
-  place_curseur(1, 0);
+  place_curseur(old_lig, old_col);
 }
 
 void init_traitant_IT(uint32_t num_IT, void (*traitant)(void)) {
@@ -62,7 +65,7 @@ void tic_PIT(void) {
   tics++;
   if (tics == 50) {
     tics = 0;
-    sec++;
+    system_time++;
     write_hour();
   }
   ordonnance();
